@@ -23,6 +23,9 @@ RUN wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
 RUN cd nginx-${NGINX_VERSION} && \
     ./configure --with-http_ssl_module --add-module=../nginx-rtmp-module && \
     make && make install
+    
+# Додаємо ffmpeg 
+RUN apk add --no-cache ffmpeg
 
 # Копіюємо власний конфіг
 COPY nginx.conf /usr/local/nginx/conf/nginx.conf
