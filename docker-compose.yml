@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "1935:1935"
+      - "80:80"
+    volumes:
+      - ./nginx:/opt/data  # Якщо треба HLS доступ
+    restart: unless-stopped
