@@ -1,19 +1,35 @@
 FROM alpine:latest
 
-# Потрібні пакети
+# Встановлення залежностей
 RUN apk add --no-cache \
-    nginx \
-    nginx-mod-rtmp \
-    ffmpeg \
-    bash
+    build-base \
+    pcre-dev \
+    openssl-dev \
+    zlib-dev \
+    git \
+    wget \
+    linux-headers
 
-# Копіюємо свій конфіг
-COPY nginx.conf /etc/nginx/nginx.conf
+# Встановлення nginx із rtmp-модулем
+WORKDIR /build
 
-# Створимо потрібну директорію
-RUN mkdir -p /opt/data/hls
+# Завантажити NGINX і RTMP-модуль
+ENV NGINX_VERSION=1.25.3
+RUN wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
+    tar -zxvf nginx-${NGINX_VERSION}.tar.gz && \
+    git clone https://github.com/arut/nginx-rtmp-module.git
 
+# Збірка NGINX з RTMP
+RUN cd nginx-${NGINX_VERSION} && \
+    ./configure --with-http_ssl_module --add-module=../nginx-rtmp-module && \
+    make && make install
+
+# Копіюємо власний конфіг
+COPY nginx.conf /usr/local/nginx/conf/nginx.conf
+
+# Відкриті порти
 EXPOSE 1935 80
 
-# Запускаємо nginx у foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Запуск
+CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
+
